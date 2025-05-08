@@ -1,4 +1,6 @@
-import { Link } from '@remix-run/react';
+'use client';
+
+import Link from 'next/link';
 import { FaFacebook, FaInstagram, FaWhatsapp } from 'react-icons/fa';
 
 export default function Footer() {
@@ -19,17 +21,17 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-4">Enlaces Rápidos</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/productos" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/productos" className="text-gray-300 hover:text-white transition-colors">
                   Productos
                 </Link>
               </li>
               <li>
-                <Link to="/marcas" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/marcas" className="text-gray-300 hover:text-white transition-colors">
                   Marcas
                 </Link>
               </li>
               <li>
-                <Link to="/nosotros" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/nosotros" className="text-gray-300 hover:text-white transition-colors">
                   Sobre Nosotros
                 </Link>
               </li>

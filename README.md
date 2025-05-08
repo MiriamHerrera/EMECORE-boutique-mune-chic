@@ -1,21 +1,32 @@
-# Mune Chic - Sistema de Gestión de Boutique
+# Muñe Chic - Boutique E-commerce
 
-Sistema de gestión para boutique con funcionalidades de administración de productos, categorías, atributos y variantes.
+Plataforma de comercio electrónico para la boutique Muñe Chic, con panel de administración y catálogo de productos.
 
 ## Características
 
-- Gestión de categorías y subcategorías
-- Gestión de atributos y valores de atributos
-- Gestión de productos con imágenes
-- Gestión de variantes de productos
-- Interfaz administrativa moderna y responsive
-- API RESTful para todas las operaciones
+- Panel de administración para gestión de productos y categorías
+- Catálogo de productos con filtros y búsqueda
+- Gestión de imágenes de productos
+- Diseño responsive y moderno
+- Autenticación y autorización
+- Notificaciones y confirmaciones
+- Optimización de imágenes
+- SEO friendly
+
+## Tecnologías
+
+- Next.js 14
+- React 18
+- TypeScript
+- MySQL
+- Tailwind CSS
+- Framer Motion
+- React Icons
 
 ## Requisitos
 
-- Node.js 18.x o superior
-- MySQL 8.x o superior
-- npm o yarn
+- Node.js 18 o superior
+- MySQL 8.0 o superior
 
 ## Instalación
 
@@ -34,14 +45,22 @@ npm install
 ```bash
 cp .env.example .env
 ```
-Editar el archivo `.env` con tus credenciales de base de datos.
+Editar el archivo `.env` con tus configuraciones.
 
-4. Ejecutar las migraciones:
+4. Crear la base de datos:
 ```bash
-node scripts/run-migration.js
+mysql -u root -p
+```
+```sql
+CREATE DATABASE mune_chic;
 ```
 
-5. Iniciar el servidor de desarrollo:
+5. Ejecutar migraciones:
+```bash
+npm run migrate
+```
+
+6. Iniciar el servidor de desarrollo:
 ```bash
 npm run dev
 ```
@@ -50,26 +69,41 @@ npm run dev
 
 ```
 mune-chic/
-├── app/                    # Aplicación Next.js
-│   ├── api/               # Endpoints de la API
+├── app/                    # Código fuente de la aplicación
 │   ├── admin/             # Panel de administración
-│   └── (routes)/          # Rutas públicas
-├── components/            # Componentes React
-├── lib/                   # Utilidades y configuraciones
-├── migrations/           # Scripts de migración SQL
+│   ├── api/               # API endpoints
+│   ├── components/        # Componentes reutilizables
+│   ├── hooks/             # Custom hooks
+│   ├── lib/              # Utilidades y configuraciones
+│   ├── styles/           # Estilos globales
+│   └── types/            # TypeScript types
 ├── public/               # Archivos estáticos
-└── styles/              # Estilos globales
+├── migrations/          # Migraciones de base de datos
+└── scripts/            # Scripts de utilidad
 ```
 
-## Tecnologías Utilizadas
+## Scripts Disponibles
 
-- Next.js 14
-- React 18
-- TypeScript
-- Tailwind CSS
-- MySQL
-- Prisma
+- `npm run dev`: Inicia el servidor de desarrollo
+- `npm run build`: Construye la aplicación para producción
+- `npm run start`: Inicia el servidor de producción
+- `npm run lint`: Ejecuta el linter
+- `npm run typecheck`: Verifica tipos de TypeScript
+
+## Contribuir
+
+1. Fork el repositorio
+2. Crear una rama para tu feature (`git checkout -b feature/amazing-feature`)
+3. Commit tus cambios (`git commit -m 'Add some amazing feature'`)
+4. Push a la rama (`git push origin feature/amazing-feature`)
+5. Abrir un Pull Request
 
 ## Licencia
 
-MIT 
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+
+## Contacto
+
+Tu Nombre - [@tu_twitter](https://twitter.com/tu_twitter)
+
+Link del proyecto: [https://github.com/tu-usuario/mune-chic](https://github.com/tu-usuario/mune-chic) 
