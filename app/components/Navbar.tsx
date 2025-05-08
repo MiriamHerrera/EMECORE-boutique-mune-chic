@@ -25,6 +25,7 @@ export default function Navbar() {
     { href: '/productos', label: 'Productos' },
     { href: '/marcas', label: 'Marcas' },
     { href: '/nosotros', label: 'Nosotros' },
+    { href: '/admin/login', label: 'Admin', className: 'text-secondary font-medium' },
   ];
 
   return (
@@ -38,7 +39,7 @@ export default function Navbar() {
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20">
           <div className="flex items-center">
-            {/* Logo */}
+          {/* Logo */}
             <Link href="/" className="flex-shrink-0 flex items-center">
               <motion.img
                 whileHover={{ scale: 1.05 }}
@@ -71,9 +72,9 @@ export default function Navbar() {
                 )}
               </Link>
             ))}
-            <a
-              href="https://wa.me/tunumero"
-              target="_blank"
+            <a 
+              href="https://wa.me/tunumero" 
+              target="_blank" 
               rel="noopener noreferrer"
               className="ml-4 inline-flex items-center gap-2 bg-secondary text-white px-4 py-2 rounded-lg hover:bg-secondary-dark transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5"
             >
@@ -84,24 +85,24 @@ export default function Navbar() {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
               className="inline-flex items-center justify-center p-2 rounded-lg text-gray-700 hover:text-secondary hover:bg-gray-100/50 focus:outline-none"
-            >
-              <span className="sr-only">Abrir menú principal</span>
-              {isOpen ? (
+          >
+            <span className="sr-only">Abrir menú principal</span>
+            {isOpen ? (
                 <FaTimes className="block h-6 w-6" />
-              ) : (
+            ) : (
                 <FaBars className="block h-6 w-6" />
-              )}
-            </button>
+            )}
+          </button>
           </div>
         </div>
       </div>
 
       {/* Mobile menu */}
       <AnimatePresence>
-        {isOpen && (
+      {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -123,20 +124,20 @@ export default function Navbar() {
                   {item.label}
                 </Link>
               ))}
-              <a
-                href="https://wa.me/tunumero"
-                target="_blank"
-                rel="noopener noreferrer"
+                    <a
+                      href="https://wa.me/tunumero"
+                      target="_blank"
+                      rel="noopener noreferrer"
                 className="flex items-center gap-2 w-full px-4 py-3 rounded-lg text-base font-medium bg-secondary text-white hover:bg-secondary-dark transition-all duration-300"
-                onClick={() => setIsOpen(false)}
-              >
+                      onClick={() => setIsOpen(false)}
+                    >
                 <FaWhatsapp className="text-lg" />
                 <span>Contactar</span>
-              </a>
+                    </a>
             </div>
           </motion.div>
-        )}
+      )}
       </AnimatePresence>
     </nav>
   );
-}
+} 

@@ -1,6 +1,8 @@
-import { useState } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   FaBox,
   FaTags,
@@ -36,7 +38,27 @@ const menuItems = [
 
 export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Verificar autenticación
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/check');
+        if (!response.ok) {
+          router.push('/admin/login');
+        } else {
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        router.push('/admin/login');
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   const handleLogout = async () => {
     try {
@@ -45,12 +67,17 @@ export default function AdminSidebar() {
       });
 
       if (response.ok) {
-        window.location.href = '/admin/login';
+        setIsAuthenticated(false);
+        router.push('/admin/login');
       }
     } catch (error) {
       console.error('Error during logout:', error);
     }
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <>
@@ -101,8 +128,8 @@ export default function AdminSidebar() {
                     href={item.href}
                     className={`flex items-center px-4 py-2 text-sm ${
                       isActive
-                        ? 'text-blue-600 bg-blue-50 border-r-4 border-blue-600'
-                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                        ? 'text-secondary bg-secondary/10 border-r-4 border-secondary'
+                        : 'text-gray-600 hover:text-secondary hover:bg-secondary/5'
                     }`}
                     onClick={() => setIsOpen(false)}
                   >
@@ -119,7 +146,7 @@ export default function AdminSidebar() {
         <div className="absolute bottom-0 w-full p-4 border-t">
           <button
             onClick={handleLogout}
-            className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded"
+            className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
           >
             <FaSignOutAlt className="w-5 h-5 mr-3" />
             Cerrar Sesión

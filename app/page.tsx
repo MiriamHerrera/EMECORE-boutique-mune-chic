@@ -60,7 +60,7 @@ export default function HomePage() {
               <h1 className="text-5xl md:text-7xl font-bold mb-4">
                 Muñe Chic
                 <span className="block text-2xl md:text-3xl mt-4 font-light tracking-widest">BOUTIQUE</span>
-              </h1>
+      </h1>
             </motion.div>
 
             <motion.p 
@@ -329,7 +329,7 @@ export default function HomePage() {
             className="relative"
           >
             <div className="absolute inset-0 -translate-x-4 -translate-y-4 border-2 border-primary/20 rounded-2xl"></div>
-            <div className="relative overflow-hidden rounded-2xl aspect-[4/5]">
+            <div className="relative overflow-hidden rounded-2xl aspect-[5/3]">
               <img
                 src="/images/about.jpg"
                 alt="Nuestra Historia"

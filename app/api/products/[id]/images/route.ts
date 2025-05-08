@@ -75,10 +75,10 @@ export async function POST(
       
       await writeFile(filepath, buffer);
 
-      const [result] = await pool.execute(
-        'INSERT INTO product_images (product_id, url, is_main) VALUES (?, ?, ?)',
+    const [result] = await pool.execute(
+      'INSERT INTO product_images (product_id, url, is_main) VALUES (?, ?, ?)',
         [params.id, `/uploads/products/${filename}`, isMain && savedImages.length === 0]
-      );
+    );
 
       savedImages.push({
         id: (result as any).insertId,
@@ -171,10 +171,10 @@ export async function DELETE(
       );
 
       if ((nextImage as any[]).length) {
-        await pool.execute(
+    await pool.execute(
           'UPDATE product_images SET is_main = true WHERE id = ?',
           [(nextImage as any[])[0].id]
-        );
+    );
       }
     }
 
