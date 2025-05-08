@@ -203,7 +203,7 @@ if (import.meta) {
     //@ts-expect-error
     "app\\components\\Navbar.tsx"
   );
-  import.meta.hot.lastModified = "1746568346204.379";
+  import.meta.hot.lastModified = "1746568360365.4238";
 }
 function Navbar() {
   _s();
@@ -737,4 +737,4 @@ export {
   links,
   meta
 };
-//# sourceMappingURL=/build/root-VVKUEB4D.js.map
+//# sourceMappingURL=/build/root-Z5TLT3VG.js.map
