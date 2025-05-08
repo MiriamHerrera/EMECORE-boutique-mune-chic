@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -28,15 +26,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="scroll-smooth">
       <body className={`${inter.className} bg-gray-50`}>
-        <header className="sticky top-0 z-50 bg-white shadow-sm">
-          <Navbar />
-        </header>
-        
-        <main className="min-h-screen max-w-[1400px] mx-auto px-6 md:px-8">
-          {children}
-        </main>
-
-        <Footer />
+        {children}
       </body>
     </html>
   )
