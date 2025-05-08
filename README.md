@@ -106,4 +106,21 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 Tu Nombre - [@tu_twitter](https://twitter.com/tu_twitter)
 
-Link del proyecto: [https://github.com/tu-usuario/mune-chic](https://github.com/tu-usuario/mune-chic) 
+Link del proyecto: [https://github.com/tu-usuario/mune-chic](https://github.com/tu-usuario/mune-chic)
+
+## Estructura de Carpetas
+
+```
+app/
+├── page.tsx (Inicio)
+├── productos/
+│   └── page.tsx (Productos)
+├── marcas/
+│   └── page.tsx (Marcas)
+├── nosotros/
+│   └── page.tsx (Sobre Nosotros)
+├── components/
+│   ├── Navbar.tsx
+│   └── Footer.tsx
+└── layout.tsx (Layout principal)
+``` 
