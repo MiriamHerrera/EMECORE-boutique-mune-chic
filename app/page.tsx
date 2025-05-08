@@ -76,7 +76,7 @@ export default function HomePage() {
             >
               <Link 
                 href="/productos" 
-                className="btn-primary hover:scale-105 transform transition-transform px-8 py-4 text-lg tracking-wider"
+                className="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-4 text-lg tracking-wider rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
               >
                 Ver Colección
               </Link>
@@ -84,7 +84,7 @@ export default function HomePage() {
                 href="https://wa.me/tunumero"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-secondary hover:scale-105 transform transition-transform px-8 py-4 text-lg tracking-wider"
+                className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-8 py-4 text-lg tracking-wider rounded-lg hover:bg-white/20 transition-all duration-300"
               >
                 Contactar
               </a>
@@ -126,7 +126,7 @@ export default function HomePage() {
         initial="hidden"
         animate={categoriesInView ? "visible" : "hidden"}
         variants={staggerChildren}
-        className="container-main py-16"
+        className="container-main py-16 bg-gradient-to-b from-white to-gray-50/50"
       >
         <motion.div variants={fadeIn} className="text-center mb-12 space-y-4">
           <span className="text-sm uppercase tracking-[0.2em] text-secondary">Explora</span>
@@ -226,7 +226,7 @@ export default function HomePage() {
         initial="hidden"
         animate={brandsInView ? "visible" : "hidden"}
         variants={staggerChildren}
-        className="container-main py-16"
+        className="container-main py-16 bg-gradient-to-b from-gray-50/50 to-white"
       >
         <motion.div variants={fadeIn} className="text-center mb-12 space-y-4">
           <span className="text-sm uppercase tracking-[0.2em] text-secondary">Nuestras Marcas</span>
@@ -313,7 +313,7 @@ export default function HomePage() {
         initial="hidden"
         animate={aboutInView ? "visible" : "hidden"}
         variants={staggerChildren}
-        className="container-main py-16"
+        className="container-main py-16 bg-gradient-to-b from-white to-gray-50/50"
       >
         <motion.div variants={fadeIn} className="text-center mb-12 space-y-4">
           <span className="text-sm uppercase tracking-[0.2em] text-secondary">Conócenos</span>
@@ -442,7 +442,7 @@ export default function HomePage() {
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        className="relative overflow-hidden"
+        className="relative overflow-hidden bg-gradient-to-b from-gray-50/50 to-white"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-white to-secondary/30 opacity-50" />
         
