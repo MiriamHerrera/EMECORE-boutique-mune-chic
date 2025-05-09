@@ -43,13 +43,29 @@ export async function PUT(
   
   try {
     const body = await request.json();
-    const { name, description } = body;
+    const { name, description, gender, type } = body;
 
     // Validaciones
     if (!name || name.trim() === '') {
       connection.release();
       return NextResponse.json(
         { error: 'El nombre de la categoría es requerido' },
+        { status: 400 }
+      );
+    }
+
+    if (!gender || !['hombre', 'mujer', 'unisex'].includes(gender)) {
+      connection.release();
+      return NextResponse.json(
+        { error: 'El género es requerido y debe ser hombre, mujer o unisex' },
+        { status: 400 }
+      );
+    }
+
+    if (!type || !['ropa', 'calzado', 'accesorios'].includes(type)) {
+      connection.release();
+      return NextResponse.json(
+        { error: 'El tipo es requerido y debe ser ropa, calzado o accesorios' },
         { status: 400 }
       );
     }
@@ -70,8 +86,8 @@ export async function PUT(
 
     // Actualizar la categoría
     await connection.execute(
-      'UPDATE categories SET name = ?, description = ? WHERE id = ?',
-      [name.trim(), description ? description.trim() : null, params.id]
+      'UPDATE categories SET name = ?, description = ?, gender = ?, type = ? WHERE id = ?',
+      [name.trim(), description ? description.trim() : null, gender, type, params.id]
     );
 
     // Obtener la categoría actualizada

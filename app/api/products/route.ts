@@ -6,70 +6,27 @@ export async function GET(request: Request) {
   const connection = await pool.getConnection();
   
   try {
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const search = searchParams.get('search') || '';
-    const categoryId = searchParams.get('categoryId');
-    const offset = (page - 1) * limit;
+    const url = new URL(request.url);
+    const categoryId = url.searchParams.get('category_id');
 
-    console.log('Fetching products with params:', { page, limit, search, categoryId });
-
-    let query = `
-      SELECT p.*, 
-        c.name as category_name,
-        (SELECT url FROM product_images WHERE product_id = p.id AND is_main = true LIMIT 1) as main_image
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      WHERE 1 = 1
-    `;
-
-    const params: any[] = [];
-
-    if (search) {
-      query += ` AND (p.name LIKE ? OR p.description LIKE ?)`;
-      params.push(`%${search}%`, `%${search}%`);
-    }
+    let query = 'SELECT * FROM products';
+    let params: any[] = [];
 
     if (categoryId) {
-      query += ` AND p.category_id = ?`;
+      query += ' WHERE category_id = ?';
       params.push(categoryId);
     }
 
-    // Obtener el total de productos
-    const [countResult] = await connection.execute(
-      `SELECT COUNT(*) as total FROM (${query}) as t`,
-      params
-    );
-    const total = (countResult as any[])[0].total;
+    query += ' ORDER BY created_at DESC';
 
-    console.log('Total products found:', total);
-
-    // Obtener los productos paginados
-    query += ` ORDER BY p.created_at DESC LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
-
-    const [products] = await connection.execute(query, params);
-    console.log(`Retrieved ${(products as any[]).length} products`);
-
+    const [rows] = await connection.execute(query, params);
     connection.release();
-    return NextResponse.json({
-      products,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
-      }
-    });
+    return NextResponse.json(rows);
   } catch (error) {
     console.error('Error fetching products:', error);
     connection.release();
     return NextResponse.json(
-      { 
-        error: 'Error al obtener los productos',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: 'Error al obtener los productos' },
       { status: 500 }
     );
   }
@@ -78,80 +35,87 @@ export async function GET(request: Request) {
 // POST /api/products
 export async function POST(request: Request) {
   const connection = await pool.getConnection();
+  console.log('Database connection established for POST /api/products');
   
   try {
     const body = await request.json();
-    const { name, description, price, category_id, stock = 0 } = body;
-
-    console.log('Received product data:', { name, description, price, category_id, stock });
+    const { name, description, price, stock, category_id, image_url } = body;
+    console.log('Received product data:', { name, description, price, stock, category_id, image_url });
 
     // Validaciones
     if (!name || name.trim() === '') {
+      console.log('Validation failed: Name is required');
+      connection.release();
       return NextResponse.json(
         { error: 'El nombre del producto es requerido' },
         { status: 400 }
       );
     }
 
-    if (!price || price <= 0) {
+    if (!price || isNaN(price) || price <= 0) {
+      console.log('Validation failed: Invalid price');
+      connection.release();
       return NextResponse.json(
-        { error: 'El precio del producto es requerido y debe ser mayor a 0' },
+        { error: 'El precio debe ser un número mayor a 0' },
         { status: 400 }
       );
     }
 
     if (!category_id) {
+      console.log('Validation failed: Category is required');
+      connection.release();
       return NextResponse.json(
-        { error: 'La categoría del producto es requerida' },
+        { error: 'La categoría es requerida' },
         { status: 400 }
       );
     }
 
     // Verificar que la categoría existe
+    console.log('Checking if category exists:', category_id);
     const [category] = await connection.execute(
       'SELECT id FROM categories WHERE id = ?',
       [category_id]
     );
+    console.log('Category check result:', category);
 
     if (!(category as any[]).length) {
+      console.log('Category not found');
       connection.release();
       return NextResponse.json(
-        { error: 'La categoría no existe' },
-        { status: 404 }
+        { error: 'La categoría seleccionada no existe' },
+        { status: 400 }
       );
     }
 
-    // Crear el producto
+    // Insertar el producto
+    console.log('Inserting product...');
     const [result] = await connection.execute(
-      'INSERT INTO products (name, description, price, category_id, stock) VALUES (?, ?, ?, ?, ?)',
-      [name.trim(), description ? description.trim() : null, price, category_id, stock]
+      'INSERT INTO products (name, description, price, stock, category_id, image_url) VALUES (?, ?, ?, ?, ?, ?)',
+      [
+        name.trim(),
+        description ? description.trim() : null,
+        price,
+        stock || 0,
+        category_id,
+        image_url || null
+      ]
     );
-
     console.log('Product inserted successfully:', result);
-    const productId = (result as any).insertId;
 
     // Obtener el producto creado
-    const [rows] = await connection.execute(
-      `SELECT p.*, 
-        c.name as category_name,
-        (SELECT url FROM product_images WHERE product_id = p.id AND is_main = true LIMIT 1) as main_image
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.id = ?`,
-      [productId]
+    const [product] = await connection.execute(
+      'SELECT * FROM products WHERE id = ?',
+      [(result as any).insertId]
     );
+    console.log('Retrieved new product:', product[0]);
 
-    console.log('Retrieved new product:', rows[0]);
     connection.release();
-    return NextResponse.json(rows[0]);
+    return NextResponse.json((product as any[])[0]);
   } catch (error) {
     console.error('Error creating product:', error);
     connection.release();
     return NextResponse.json(
-      { 
-        error: 'Error al crear el producto',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: 'Error al crear el producto' },
       { status: 500 }
     );
   }

@@ -42,9 +42,11 @@ export default function ProductsAdminPage() {
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -67,6 +69,20 @@ export default function ProductsAdminPage() {
     } catch (error) {
       console.error('Error fetching products:', error);
       setError('Error al cargar los productos');
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/categories');
+      if (!response.ok) {
+        throw new Error('Error al cargar las categorías');
+      }
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setError('Error al cargar las categorías');
     }
   };
 
@@ -374,9 +390,11 @@ export default function ProductsAdminPage() {
                       required
                     >
                       <option value="">Seleccionar categoría</option>
-                      <option value="1">Vestidos</option>
-                      <option value="2">Blusas</option>
-                      <option value="3">Pantalones</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name} - {category.gender} - {category.type}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div>

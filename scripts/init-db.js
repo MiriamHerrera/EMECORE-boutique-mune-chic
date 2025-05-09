@@ -10,28 +10,30 @@ async function main() {
 
   try {
     // Crear base de datos
-    await connection.execute(
+    await connection.query(
       `CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME || 'mune_chic'}`
     );
     console.log('Database created or already exists');
 
     // Usar la base de datos
-    await connection.execute(`USE ${process.env.DB_NAME || 'mune_chic'}`);
+    await connection.query(`USE ${process.env.DB_NAME || 'mune_chic'}`);
 
     // Crear tablas
-    await connection.execute(`
+    await connection.query(`
       CREATE TABLE IF NOT EXISTS categories (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         description TEXT,
         image_url VARCHAR(255),
+        gender ENUM('hombre', 'mujer', 'unisex') NOT NULL DEFAULT 'unisex',
+        type ENUM('ropa', 'calzado', 'accesorios') NOT NULL DEFAULT 'ropa',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `);
     console.log('Categories table created');
 
-    await connection.execute(`
+    await connection.query(`
       CREATE TABLE IF NOT EXISTS products (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -46,7 +48,7 @@ async function main() {
     `);
     console.log('Products table created');
 
-    await connection.execute(`
+    await connection.query(`
       CREATE TABLE IF NOT EXISTS product_images (
         id INT AUTO_INCREMENT PRIMARY KEY,
         product_id INT NOT NULL,
@@ -60,15 +62,15 @@ async function main() {
 
     // Insertar categorías de ejemplo
     const categories = [
-      ['Vestidos', 'Elegantes vestidos para toda ocasión'],
-      ['Blusas', 'Blusas modernas y casuales'],
-      ['Pantalones', 'Pantalones cómodos y a la moda']
+      ['Vestidos', 'Elegantes vestidos para toda ocasión', 'mujer', 'ropa'],
+      ['Blusas', 'Blusas modernas y casuales', 'mujer', 'ropa'],
+      ['Pantalones', 'Pantalones cómodos y a la moda', 'unisex', 'ropa']
     ];
 
-    for (const [name, description] of categories) {
-      await connection.execute(
-        'INSERT INTO categories (name, description) VALUES (?, ?)',
-        [name, description]
+    for (const [name, description, gender, type] of categories) {
+      await connection.query(
+        'INSERT INTO categories (name, description, gender, type) VALUES (?, ?, ?, ?)',
+        [name, description, gender, type]
       );
     }
     console.log('Sample categories inserted');
