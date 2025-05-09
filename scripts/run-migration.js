@@ -1,32 +1,30 @@
-const { pool } = require('../lib/db');
-const fs = require('fs');
+require('dotenv').config();
+const mysql = require('mysql2/promise');
+const fs = require('fs').promises;
 const path = require('path');
 
 async function runMigration() {
+  const connection = await mysql.createConnection({
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'mune_chic'
+  });
+
   try {
-    // Leer el archivo de migración
-    const migrationPath = path.join(__dirname, '../migrations/005_final_fixes.sql');
-    const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
+    // Leer el archivo SQL
+    const sql = await fs.readFile(
+      path.join(__dirname, '..', 'migrations', '004_add_stock_column.sql'),
+      'utf8'
+    );
 
-    // Dividir el SQL en statements individuales
-    const statements = migrationSQL
-      .split(';')
-      .map(statement => statement.trim())
-      .filter(statement => statement.length > 0);
-
-    // Ejecutar cada statement por separado
-    console.log('Ejecutando migración...');
-    for (const statement of statements) {
-      await pool.query(statement);
-      console.log('Statement ejecutado:', statement.split('\n')[0]);
-    }
-    console.log('Migración completada exitosamente');
-
-    // Cerrar la conexión
-    await pool.end();
+    // Ejecutar la migración
+    await connection.execute(sql);
+    console.log('Migration completed successfully');
   } catch (error) {
-    console.error('Error al ejecutar la migración:', error);
-    process.exit(1);
+    console.error('Error running migration:', error);
+  } finally {
+    await connection.end();
   }
 }
 

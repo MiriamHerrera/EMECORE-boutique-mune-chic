@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiX, FiUpload } from 'react-icons/fi';
 import PlaceholderImage from '@/components/PlaceholderImage';
 
 interface Product {
@@ -38,10 +38,22 @@ export default function ProductsAdminPage() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    // Limpiar la URL del objeto cuando el componente se desmonte
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const fetchProducts = async () => {
     try {
@@ -65,18 +77,75 @@ export default function ProductsAdminPage() {
     }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB
+        setError('La imagen no debe superar los 10MB');
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        setError('El archivo debe ser una imagen');
+        return;
+      }
+
+      setSelectedImage(file);
+      // Crear URL para preview
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB
+        setError('La imagen no debe superar los 10MB');
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        setError('El archivo debe ser una imagen');
+        return;
+      }
+
+      setSelectedImage(file);
+      // Crear URL para preview
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
+      // Crear FormData para enviar la imagen
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('description', formData.description);
+      formDataToSend.append('price', formData.price.toString());
+      formDataToSend.append('category_id', formData.category_id);
+      formDataToSend.append('stock', formData.stock.toString());
+      
+      if (selectedImage) {
+        formDataToSend.append('image', selectedImage);
+      }
+
       const response = await fetch('/api/productos', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        body: formDataToSend, // Ya no necesitamos el header Content-Type, fetch lo establecerá automáticamente
       });
 
       if (!response.ok) {
@@ -87,6 +156,8 @@ export default function ProductsAdminPage() {
       const newProduct = await response.json();
       setProducts(prev => [newProduct, ...prev]);
       setFormData(initialFormData);
+      setSelectedImage(null);
+      setPreviewUrl('');
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error creating product:', error);
@@ -303,41 +374,56 @@ export default function ProductsAdminPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Imagen del Producto
                   </label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                  <div
+                    className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 ${!selectedImage ? 'border-dashed' : 'border-solid'} rounded-lg`}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                  >
                     <div className="space-y-1 text-center">
-                      <svg
-                        className="mx-auto h-12 w-12 text-gray-400"
-                        stroke="currentColor"
-                        fill="none"
-                        viewBox="0 0 48 48"
-                        aria-hidden="true"
-                      >
-                        <path
-                          d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                      <div className="flex text-sm text-gray-600">
-                        <label
-                          htmlFor="file-upload"
-                          className="relative cursor-pointer bg-white rounded-md font-medium text-pink-500 hover:text-pink-600"
-                        >
-                          <span>Subir archivo</span>
-                          <input
-                            id="file-upload"
-                            name="file-upload"
-                            type="file"
-                            className="sr-only"
-                            accept="image/*"
+                      {previewUrl ? (
+                        <div className="relative w-40 h-40 mx-auto">
+                          <img
+                            src={previewUrl}
+                            alt="Preview"
+                            className="w-full h-full object-cover rounded-lg"
                           />
-                        </label>
-                        <p className="pl-1">o arrastra y suelta</p>
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        PNG, JPG, GIF hasta 10MB
-                      </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedImage(null);
+                              setPreviewUrl('');
+                            }}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                          >
+                            <FiX className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <FiUpload className="mx-auto h-12 w-12 text-gray-400" />
+                          <div className="flex text-sm text-gray-600">
+                            <label
+                              htmlFor="file-upload"
+                              className="relative cursor-pointer bg-white rounded-md font-medium text-pink-500 hover:text-pink-600"
+                            >
+                              <span>Subir archivo</span>
+                              <input
+                                id="file-upload"
+                                name="file-upload"
+                                type="file"
+                                className="sr-only"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                ref={fileInputRef}
+                              />
+                            </label>
+                            <p className="pl-1">o arrastra y suelta</p>
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            PNG, JPG, GIF hasta 10MB
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
