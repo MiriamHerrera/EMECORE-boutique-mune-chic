@@ -40,6 +40,7 @@ export default function ProductsAdminPage() {
   const [error, setError] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -125,13 +126,47 @@ export default function ProductsAdminPage() {
     }
   };
 
+  const handleEdit = async (product: Product) => {
+    setFormData({
+      name: product.name,
+      description: product.description || '',
+      price: typeof product.price === 'string' ? parseFloat(product.price) : product.price,
+      category_id: product.category_id?.toString() || '',
+      stock: product.stock
+    });
+    setPreviewUrl(product.image || '');
+    setEditingProductId(product.id);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (productId: string) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/productos/${productId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al eliminar el producto');
+      }
+
+      setProducts(prev => prev.filter(p => p.id !== productId));
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      setError(error instanceof Error ? error.message : 'Error al eliminar el producto');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      // Crear FormData para enviar la imagen
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
@@ -143,25 +178,36 @@ export default function ProductsAdminPage() {
         formDataToSend.append('image', selectedImage);
       }
 
-      const response = await fetch('/api/productos', {
-        method: 'POST',
-        body: formDataToSend, // Ya no necesitamos el header Content-Type, fetch lo establecerá automáticamente
+      const url = editingProductId 
+        ? `/api/productos/${editingProductId}`
+        : '/api/productos';
+
+      const response = await fetch(url, {
+        method: editingProductId ? 'PUT' : 'POST',
+        body: formDataToSend,
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al crear el producto');
+        throw new Error(errorData.error || `Error al ${editingProductId ? 'actualizar' : 'crear'} el producto`);
       }
 
       const newProduct = await response.json();
-      setProducts(prev => [newProduct, ...prev]);
+
+      if (editingProductId) {
+        setProducts(prev => prev.map(p => p.id === editingProductId ? newProduct : p));
+      } else {
+        setProducts(prev => [newProduct, ...prev]);
+      }
+
       setFormData(initialFormData);
       setSelectedImage(null);
       setPreviewUrl('');
+      setEditingProductId(null);
       setIsModalOpen(false);
     } catch (error) {
-      console.error('Error creating product:', error);
-      setError(error instanceof Error ? error.message : 'Error al crear el producto');
+      console.error('Error saving product:', error);
+      setError(error instanceof Error ? error.message : 'Error al guardar el producto');
     } finally {
       setIsLoading(false);
     }
@@ -243,12 +289,14 @@ export default function ProductsAdminPage() {
             </div>
             <div className="col-span-2 flex gap-2">
               <button
+                onClick={() => handleEdit(product)}
                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                 title="Editar"
               >
                 <FiEdit2 />
               </button>
               <button
+                onClick={() => handleDelete(product.id)}
                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                 title="Eliminar"
               >
@@ -281,9 +329,17 @@ export default function ProductsAdminPage() {
               className="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6"
             >
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Nuevo Producto</h2>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {editingProductId ? 'Editar Producto' : 'Nuevo Producto'}
+                </h2>
                 <button
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setFormData(initialFormData);
+                    setSelectedImage(null);
+                    setPreviewUrl('');
+                    setEditingProductId(null);
+                  }}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   <FiX className="text-xl text-gray-500" />
