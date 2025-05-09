@@ -65,6 +65,7 @@ export default function ProductsAdminPage() {
         throw new Error('Error al cargar los productos');
       }
       const data = await response.json();
+      console.log('Products data:', data);
       setProducts(data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -74,12 +75,14 @@ export default function ProductsAdminPage() {
 
   const fetchCategories = async () => {
     try {
+      console.log('Fetching categories...');
       const response = await fetch('/api/categories');
       if (!response.ok) {
         throw new Error('Error al cargar las categorías');
       }
       const data = await response.json();
-      setCategories(data);
+      console.log('Categories loaded:', data);
+      setCategories(data || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
       setError('Error al cargar las categorías');
@@ -194,10 +197,20 @@ export default function ProductsAdminPage() {
         formDataToSend.append('image', selectedImage);
       }
 
+      console.log('Sending form data:', {
+        name: formData.name,
+        description: formData.description,
+        price: formData.price,
+        category_id: formData.category_id,
+        stock: formData.stock,
+        hasImage: !!selectedImage
+      });
+
       const url = editingProductId 
         ? `/api/productos/${editingProductId}`
         : '/api/productos';
 
+      console.log('Sending request to:', url);
       const response = await fetch(url, {
         method: editingProductId ? 'PUT' : 'POST',
         body: formDataToSend,
@@ -205,10 +218,12 @@ export default function ProductsAdminPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Server error response:', errorData);
         throw new Error(errorData.error || `Error al ${editingProductId ? 'actualizar' : 'crear'} el producto`);
       }
 
       const newProduct = await response.json();
+      console.log('Server response:', newProduct);
 
       if (editingProductId) {
         setProducts(prev => prev.map(p => p.id === editingProductId ? newProduct : p));
@@ -263,7 +278,7 @@ export default function ProductsAdminPage() {
           <div className="col-span-2">Acciones</div>
         </div>
         
-        {products.map((product) => (
+        {Array.isArray(products) && products.map((product) => (
           <div
             key={product.id}
             className="grid grid-cols-12 gap-4 p-4 items-center border-b hover:bg-gray-50 transition-colors"
@@ -288,7 +303,9 @@ export default function ProductsAdminPage() {
               <h3 className="font-medium text-gray-800">{product.name}</h3>
               <p className="text-sm text-gray-500">ID: {product.id}</p>
             </div>
-            <div className="col-span-2 text-gray-600">{product.category}</div>
+            <div className="col-span-2 text-gray-600">
+              {categories.find(c => c.id === product.category_id)?.name || 'Sin categoría'}
+            </div>
             <div className="col-span-2 text-gray-600">
               ${typeof product.price === 'string' ? parseFloat(product.price).toFixed(2) : product.price.toFixed(2)}
             </div>
@@ -322,7 +339,7 @@ export default function ProductsAdminPage() {
           </div>
         ))}
 
-        {products.length === 0 && (
+        {(!Array.isArray(products) || products.length === 0) && (
           <div className="p-8 text-center text-gray-500">
             No hay productos registrados
           </div>

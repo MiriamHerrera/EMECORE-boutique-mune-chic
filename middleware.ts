@@ -38,6 +38,11 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Permitir acceso a archivos en la carpeta uploads
+  if (pathname.startsWith('/uploads/')) {
+    return NextResponse.next();
+  }
+
   return NextResponse.next();
 }
 
@@ -52,5 +57,6 @@ export const config = {
      * - favicon.ico (favicon file)
      */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/uploads/:path*',
   ],
 }; 

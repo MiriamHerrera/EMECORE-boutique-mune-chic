@@ -13,12 +13,11 @@ export async function GET(
   
   try {
     const [rows] = await connection.execute(
-      `SELECT p.*, 
-        c.name as category_name,
-        p.image_url as image
-      FROM products p
-      LEFT JOIN categories c ON p.category_id = c.id
-      WHERE p.id = ?`,
+      `SELECT p.*, c.name as category_name, s.name as subcategory_name 
+       FROM products p 
+       LEFT JOIN categories c ON p.category_id = c.id 
+       LEFT JOIN subcategories s ON p.subcategory_id = s.id 
+       WHERE p.id = ?`,
       [params.id]
     );
 
