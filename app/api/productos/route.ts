@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
-// GET /api/products
+// GET /api/productos
 export async function GET(request: Request) {
   const connection = await pool.getConnection();
   
@@ -75,15 +75,16 @@ export async function GET(request: Request) {
   }
 }
 
-// POST /api/products
+// POST /api/productos
 export async function POST(request: Request) {
   const connection = await pool.getConnection();
   
   try {
     const body = await request.json();
-    const { name, description, price, category_id, stock = 0 } = body;
+    const { name, description, price, category_id } = body;
+    const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
 
-    console.log('Received product data:', { name, description, price, category_id, stock });
+    console.log('Received product data:', { name, description, price: numericPrice, category_id });
 
     // Validaciones
     if (!name || name.trim() === '') {
@@ -93,7 +94,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!price || price <= 0) {
+    if (!numericPrice || numericPrice <= 0) {
       return NextResponse.json(
         { error: 'El precio del producto es requerido y debe ser mayor a 0' },
         { status: 400 }
@@ -123,8 +124,8 @@ export async function POST(request: Request) {
 
     // Crear el producto
     const [result] = await connection.execute(
-      'INSERT INTO products (name, description, price, category_id, stock) VALUES (?, ?, ?, ?, ?)',
-      [name.trim(), description ? description.trim() : null, price, category_id, stock]
+      'INSERT INTO products (name, description, price, category_id) VALUES (?, ?, ?, ?)',
+      [name.trim(), description ? description.trim() : null, numericPrice, category_id]
     );
 
     console.log('Product inserted successfully:', result);

@@ -20,7 +20,7 @@ const menuItems = [
     icon: FaChartBar
   },
   {
-    href: '/admin/products',
+    href: '/admin/productos',
     label: 'Productos',
     icon: FaBox
   },
